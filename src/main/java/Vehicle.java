@@ -11,15 +11,17 @@ public class Vehicle {
     String emptyfuel = "\nThere is no fuel left. You're floating around like Major Tom.\n\n";
     public static final int EMPTYFUEL = -1;
     String success = "\nYou made it! Good job!\n\n";
+
+
     public static final int SUCCESS = 0;
     public static final int FLYING = 1;
-
     private int altitude;
     private int prevAltitude;
     private int velocity;
     private int fuel;
     private int burn;
     private int status;
+
 
     public Vehicle(int initialAltitude) {
         // initialize the altitude AND previous altitude to initialAltitude
@@ -33,23 +35,31 @@ public class Vehicle {
     public Vehicle() {}
 
     public String checkFinalStatus() {
-        if (altitude == 0) {
-            if (velocity > 10) {
-                return "CRASH!! There were no survivors.";
-            } else if (velocity > 2) {
-                return "The Starship crashed. Good luck getting back home.";
-            } else {
-                return "You made it! Good job!";
+        String s = "";
+        if (this.altitude <= 0) {
+            if (this.velocity > 10) {
+                s = dead;
+
+            }
+            if (this.velocity < 10 && this.velocity > 3) {
+                s = crashed;
+
+            }
+            if (this.velocity < 3) {
+                s = success;
+
             }
         } else {
-            return "Out of fuel. You're floating around like Major Tom.";
+            if (this.altitude > 0) {
+                s = emptyfuel;
+            }
         }
+        return s;
     }
-
 
     public int computeDeltaV(int burnAmount) {
         // return velocity + gravity - burn amount
-        return - gravity + 2 * (burn - 100);
+        return velocity + gravity - burnAmount;
     }
 
     public void adjustForBurn(int burnAmount) {
@@ -58,24 +68,24 @@ public class Vehicle {
         // set new velocity to result of computeDeltaV function.
         // subtract speed from Altitude
         // subtract burn amount fuel used from tank
-        this.burn = burnAmount;
         if (fuel >= burnAmount) {
             fuel -= burnAmount;
-            int deltaV = burnAmount == 100 ? 0 : burnAmount > 100 ? 100 - burnAmount : 100 - burnAmount;
-            velocity += deltaV;
-            altitude -= velocity;
-            if (altitude < 0) {
-                altitude = 0;
-            }
+        } else {
+            burnAmount = fuel;
+            fuel = 0;
+        }
+        int deltaV = computeDeltaV(burnAmount);
+        velocity += deltaV;
+        altitude -= velocity;
+
+        if (altitude < 0) {
+            altitude = 0;
         }
     }
-    
-    
-    
 
     public boolean stillFlying() {
         // return true if altitude is positive
-        return altitude > 0 && fuel > 0;
+        return altitude > 0;
     }
     public boolean outOfFuel() {
         return fuel <= 0;
@@ -83,7 +93,6 @@ public class Vehicle {
 
     public DescentEvent getStatus(int tick) {
         return new DescentEvent(tick, velocity, fuel, altitude, status);
-
     }
 
 }
